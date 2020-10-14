@@ -16,11 +16,14 @@ class ViewController: UIViewController {
     
     let userTextField = UITextField()
 
-   
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
         setupContainer()
+        
+        //Use this to find sqlite file
+        let container = NSPersistentContainer(name: "coreDataTutorial")
+        print(container.persistentStoreDescriptions.first?.url)
   
     }
     
@@ -63,7 +66,7 @@ class ViewController: UIViewController {
     @objc
     private func printUsers() {
         let fetchedUsers = fetchUsers()
-        if fetchedUsers.isEmpty { print("No users saved"); return }
+        if fetchedUsers.isEmpty { print("No users saved."); return }
 
         for user in users {
             print("Name: \(user.name)")
