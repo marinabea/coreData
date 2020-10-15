@@ -9,7 +9,6 @@ import UIKit
 import CoreData
 
 class ViewController: UIViewController {
-    var users = [User]()
     let entity = "User"
     var managedObjectContext: NSManagedObjectContext!
     var persistentContainer: NSPersistentContainer!
@@ -22,15 +21,14 @@ class ViewController: UIViewController {
         setupContainer()
         
         //Use this to find sqlite file
-        let container = NSPersistentContainer(name: "coreDataTutorial")
-        print(container.persistentStoreDescriptions.first?.url)
+//        let container = NSPersistentContainer(name: "coreDataTutorial")
+//        print(container.persistentStoreDescriptions.first?.url)
   
     }
     
     
     private func setupContainer() {
         persistentContainer = NSPersistentContainer(name: "coreDataTutorial")
-        
         persistentContainer.loadPersistentStores { (storeDescription, error) in
             if let error = error {
                 fatalError("Could not load Core Data Stack. Error: \(error)")
@@ -46,43 +44,39 @@ class ViewController: UIViewController {
         
         do {
             try managedObjectContext.save()
-            
         } catch {
             fatalError("Failure to save user in context: \(error)")
         }
     }
     
-    
     @objc private func fetchUsers() -> [User] {
         let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: entity)
         do {
-            let fetchedUsers = try managedObjectContext.fetch(fetch) as! [User]
-            users = fetchedUsers
+            let users = try managedObjectContext.fetch(fetch) as! [User]
             return users
         } catch {
-            fatalError("Could not fetch from model")
+            fatalError("Could not fetch from model. Error: \(error)")
         }
     }
-    @objc
-    private func printUsers() {
-        let fetchedUsers = fetchUsers()
-        if fetchedUsers.isEmpty { print("No users saved."); return }
+    
+    @objc private func printUsers() {
+        let users = fetchUsers()
+        if users.isEmpty { print("No users saved."); return }
 
         for user in users {
             print("Name: \(user.name)")
         }
     }
     
-
-    
     @objc private func removeAllUsers() {
-        if users.isEmpty { fetchUsers() }
+        let users = fetchUsers()
+        guard !users.isEmpty else { return }
         
         for user in users {
             managedObjectContext.delete(user)
         }
         
-        do  {
+        do {
             try managedObjectContext.save()
         } catch {
             fatalError("Could not save context after deletion")
@@ -118,8 +112,8 @@ class ViewController: UIViewController {
         
         let removeUserButton  = UIButton()
         removeUserButton.translatesAutoresizingMaskIntoConstraints = false
-        removeUserButton.addTarget(self, action: #selector(removeAllUsers), for: .touchUpInside)
         view.addSubview(removeUserButton)
+        removeUserButton.addTarget(self, action: #selector(removeAllUsers), for: .touchUpInside)
         removeUserButton.setTitleColor(.systemBackground, for: .highlighted)
         removeUserButton.setTitle("Clear All", for: .normal)
         removeUserButton.backgroundColor = .systemRed
@@ -134,7 +128,6 @@ class ViewController: UIViewController {
         showAllUsersButton.backgroundColor = .systemBlue
         
         NSLayoutConstraint.activate([
-        
             label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
             label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
             label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
